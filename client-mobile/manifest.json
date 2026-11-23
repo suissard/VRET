@@ -1,0 +1,9 @@
+{
+  "name": "VRET Contrôleur Praticien",
+  "short_name": "VRET Mobile",
+  "start_url": "/mobile/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "orientation": "portrait"
+}

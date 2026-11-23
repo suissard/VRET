@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b1120" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>VRET — Contrôleur Mobile</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Écran PIN si non authentifié -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <h1>VRET Contrôleur</h1>
+      <p>Saisissez le code PIN affiché sur le Dashboard PC (ou scannez le QR Code).</p>
+      <input id="pin-input" type="tel" inputmode="numeric" maxlength="4" placeholder="PIN 4 chiffres" />
+      <button id="btn-auth" class="btn-primary">Se connecter à la séance</button>
+      <p id="auth-err" class="auth-err"></p>
+    </div>
+  </div>
+
+  <!-- Interface principale une main -->
+  <div id="app-shell" class="app-shell hidden">
+    <header class="sticky-header">
+      <div class="status-bar">
+        <div class="status-left">
+          <span class="dot" id="ws-dot"></span>
+          <span id="ws-status-text">Connecté</span>
+        </div>
+        <div class="status-right" id="vr-telemetry">
+          <span class="badge" id="badge-vr">VR: Hors ligne</span>
+          <span class="badge" id="badge-fps">-- FPS</span>
+          <span class="badge hidden" id="badge-bat">--%</span>
+        </div>
+      </div>
+
+      <div id="alert-banner" class="alert-banner hidden"></div>
+
+      <button id="btn-safe-space" class="btn-safe-space">
+        🚨 ACTIVER SAFE SPACE (URGENCE)
+      </button>
+    </header>
+
+    <!-- Sélecteur de scène verrouillable -->
+    <section class="scene-selector" id="scene-selector"></section>
+
+    <!-- Onglets centraux -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="stimuli">Stimuli</button>
+      <button class="tab-btn" data-tab="likert">Likert &amp; Notes</button>
+      <button class="tab-btn" data-tab="view">Vue Patient</button>
+    </nav>
+
+    <main class="tab-content">
+      <!-- Onglet 1 : Stimuli & Paliers -->
+      <section id="tab-stimuli" class="tab-panel active">
+        <div class="card">
+          <div class="card-head-row">
+            <h2>Paliers (Facile → Difficile)</h2>
+            <div class="card-head-actions">
+              <button id="btn-save-preset-mob" class="btn-mini">+ Sauver</button>
+              <button id="btn-toggle-preset-edit" class="btn-mini">⇅ Ordre</button>
+            </div>
+          </div>
+          <div id="mob-preset-form" class="mob-preset-form hidden">
+            <input id="mob-preset-label" type="text" placeholder="Nom du palier..." />
+            <div class="mob-preset-form-btns">
+              <button id="mob-preset-cancel" class="btn-mini">Annuler</button>
+              <button id="mob-preset-confirm" class="btn-mini accent">Enregistrer</button>
+            </div>
+          </div>
+          <div id="presets-grid" class="presets-grid"></div>
+        </div>
+        <div class="card">
+          <h2>Paramètres Temps Réel</h2>
+          <div id="params-container" class="params-container"></div>
+        </div>
+        <div class="card">
+          <h2>🌿 Configuration Safe Space</h2>
+          <div id="safespace-params" class="params-container"></div>
+        </div>
+      </section>
+
+      <!-- Onglet 2 : Likert & Marqueurs Cliniques -->
+      <section id="tab-likert" class="tab-panel">
+        <div class="card last-score-card">
+          <div class="last-score-label">Dernière évaluation patient</div>
+          <div class="last-score-value" id="last-likert-score">—</div>
+          <div class="last-score-meta" id="last-likert-meta">Aucune réponse enregistrée</div>
+        </div>
+
+        <div id="active-likert-box" class="card pending-card hidden">
+          <div class="pending-title">Questionnaire affiché en VR...</div>
+          <div id="active-likert-q" class="pending-q"></div>
+          <button id="btn-cancel-likert" class="btn-secondary">Annuler l'affichage</button>
+        </div>
+
+        <div class="card">
+          <h2>Déclencher une Échelle de Likert</h2>
+          <div id="likert-triggers" class="likert-triggers"></div>
+          <div class="timer-row">
+            <label for="likert-timer-select">Timer automatique (SUDs 0–10) :</label>
+            <select id="likert-timer-select">
+              <option value="0">Désactivé</option>
+              <option value="60">Toutes les 1 min</option>
+              <option value="120">Toutes les 2 min</option>
+              <option value="300">Toutes les 5 min</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Marqueurs Cliniques (1 tap)</h2>
+          <div id="markers-grid" class="markers-grid"></div>
+          <div class="note-row">
+            <input id="marker-note-input" type="text" placeholder="Note clinique rapide..." />
+            <button id="btn-send-note" class="btn-secondary">Noter</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Onglet 3 : Vue Patient (WebRTC / Relais) -->
+      <section id="tab-view" class="tab-panel">
+        <div class="card">
+          <div class="video-header">
+            <h2>Retour Vidéo Casque</h2>
+            <button id="btn-toggle-video" class="btn-toggle-video">Activer le flux</button>
+          </div>
+          <div class="video-box">
+            <video id="webrtc-video" autoplay playsinline muted class="hidden"></video>
+            <img id="relay-video" alt="Flux patient" class="hidden" />
+            <div id="video-placeholder" class="video-placeholder">
+              Flux vidéo désactivé pour préserver la batterie et les 72–90 FPS du casque.
+            </div>
+          </div>
+          <div class="telemetry-details" id="telemetry-details"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

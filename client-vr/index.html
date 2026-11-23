@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>VRET — Client VR WebXR</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/build/three.module.js",
+        "three/addons/": "/vendor/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="vr-canvas"></canvas>
+
+  <!-- Écran d'accueil & appairage VR -->
+  <div id="lobby-overlay" class="lobby-overlay">
+    <div class="lobby-card">
+      <div class="lobby-header">
+        <span class="badge-dot" id="conn-dot"></span>
+        <span id="conn-label">Connexion au serveur local...</span>
+      </div>
+      <h1>VRET Clinical WebXR</h1>
+      <p class="subtitle">Environnement thérapeutique 100 % local. Débloquez l'audio et lancez l'immersion.</p>
+
+      <div class="pin-row">
+        <label for="pin-input">Code PIN de séance</label>
+        <input id="pin-input" type="text" inputmode="numeric" maxlength="4" placeholder="ex: 4829" autocomplete="off" />
+        <button id="btn-connect" class="btn secondary">Connecter</button>
+      </div>
+
+      <div class="status-grid">
+        <div class="stat-box">
+          <span class="stat-k">Scène prête</span>
+          <span class="stat-v" id="lobby-scene">Ascenseur</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-k">Compatibilité WebXR</span>
+          <span class="stat-v" id="xr-support-label">Vérification...</span>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="btn-enter-vr" class="btn primary large" disabled>Entrer en VR (WebXR)</button>
+        <button id="btn-enter-sim" class="btn accent large">Mode Immersion Écran / Simulateur 3D</button>
+      </div>
+
+      <p class="hint">
+        Simulateur Desktop : glisser la souris pour regarder, ZQSD/Flèches pour marcher, touche <strong>G</strong> pour basculer le mode Gaze, clic sur les notes Likert (ou touches 0–9).
+      </p>
+    </div>
+  </div>
+
+  <!-- HUD discret en mode Simulateur Écran -->
+  <div id="sim-hud" class="sim-hud hidden">
+    <div class="hud-left">
+      <span class="pill" id="hud-scene-pill">Ascenseur</span>
+      <span class="pill safe hidden" id="hud-safe-pill">SAFE SPACE ACTIF</span>
+      <span class="pill" id="hud-fps-pill">0 FPS</span>
+      <span class="pill" id="hud-mode-pill">Mode : Souris + Gaze</span>
+    </div>
+    <div class="hud-right">
+      <button id="btn-toggle-gaze" class="btn-mini">Basculer Gaze (G)</button>
+      <button id="btn-exit-sim" class="btn-mini">Menu</button>
+    </div>
+  </div>
+
+  <!-- Réticule Gaze en mode simulateur -->
+  <div id="sim-reticle" class="sim-reticle hidden"></div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

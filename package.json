@@ -1,0 +1,19 @@
+{
+  "name": "vret-platform",
+  "version": "1.0.0",
+  "description": "Plateforme VRET WebXR 100% locale pour thérapie par exposition en réalité virtuelle",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "setup-certs": "node server/certs.js --generate",
+    "test": "node --test tests/integration.test.js"
+  },
+  "dependencies": {
+    "bonjour-service": "^1.3.0",
+    "express": "^5.1.0",
+    "qrcode": "^1.5.4",
+    "three": "^0.174.0",
+    "ws": "^8.18.1"
+  }
+}

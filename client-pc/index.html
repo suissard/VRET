@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VRET — Dashboard Praticien &amp; Analytique</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar no-print">
+    <div class="brand">
+      <span class="brand-logo">🧠</span>
+      <div>
+        <div class="brand-title">VRET Clinical Platform</div>
+        <div class="brand-sub" id="network-summary">Serveur local HTTPS</div>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-view="supervision">Supervision &amp; Appairage</button>
+      <button class="nav-btn" data-view="analytics">Analyse &amp; Rapports</button>
+    </nav>
+    <div class="pin-pill">
+      <span>PIN : <strong id="header-pin">----</strong></span>
+      <button id="btn-regen-pin" class="btn-xs" title="Régénérer le PIN">↻</button>
+    </div>
+  </header>
+
+  <!-- VUE 1 : SUPERVISION & APPAIRAGE -->
+  <main id="view-supervision" class="view-container active no-print">
+    <div class="grid-3">
+      <!-- Carte 1 : Dossier Patient & Séance -->
+      <section class="panel">
+        <h2>1. Dossier Patient &amp; Séance</h2>
+        <div class="form-group">
+          <label for="patient-select">Patient (Pseudonyme)</label>
+          <select id="patient-select"></select>
+        </div>
+
+        <details class="new-patient-box">
+          <summary>+ Nouveau dossier patient pseudonymisé</summary>
+          <div class="new-patient-form">
+            <input id="new-patient-id" type="text" placeholder="Ex: PAT-2026-003" />
+            <input id="new-patient-notes" type="text" placeholder="Notes cliniques initiales..." />
+            <button id="btn-create-patient" class="btn secondary">Créer le dossier</button>
+          </div>
+        </details>
+
+        <div class="session-box" id="session-control-box">
+          <div class="session-status-line">
+            <span>Statut séance :</span>
+            <strong id="session-status-badge" class="tag idle">Aucune séance active</strong>
+          </div>
+          <div class="form-group">
+            <label for="initial-scene-select">Scène d'ouverture</label>
+            <select id="initial-scene-select"></select>
+          </div>
+          <div class="session-actions">
+            <button id="btn-start-session" class="btn primary">Démarrer la séance</button>
+            <button id="btn-end-session" class="btn danger hidden">Clôturer la séance</button>
+          </div>
+          <div id="active-session-notes-wrap" class="form-group hidden">
+            <label for="session-summary-notes">Notes de synthèse de séance</label>
+            <textarea id="session-summary-notes" rows="3" placeholder="Observations cliniques, habituation, points à reprendre..."></textarea>
+          </div>
+        </div>
+
+        <div class="clients-status">
+          <h3>Périphériques connectés</h3>
+          <div class="device-row">
+            <span>Casque VR</span>
+            <span id="dev-vr-status" class="tag off">Hors ligne</span>
+          </div>
+          <div class="device-row">
+            <span>Contrôleur Mobile</span>
+            <span id="dev-mobile-status" class="tag off">Hors ligne</span>
+          </div>
+          <div class="device-row">
+            <span>Dashboards PC</span>
+            <span id="dev-pc-count" class="tag">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Carte 2 : Console de Pilotage Direct & Vidéo -->
+      <section class="panel">
+        <div class="panel-head-row">
+          <h2>2. Console Temps Réel (PC)</h2>
+          <button id="pc-safe-btn" class="btn danger-outline">🚨 SAFE SPACE</button>
+        </div>
+
+        <div class="scene-pills" id="pc-scene-pills"></div>
+
+        <div class="presets-section">
+          <div class="likert-bar-head">
+            <span>Paliers cliniques (facile → difficile)</span>
+            <button id="pc-btn-new-preset" class="btn-xs">+ Enregistrer actuel</button>
+          </div>
+          <div id="pc-preset-editor" class="preset-editor hidden">
+            <input id="pc-preset-label-input" type="text" placeholder="Nom du palier (ex: Palier 3 — Planche 1m)" />
+            <div id="pc-preset-editor-params" class="preset-editor-params"></div>
+            <div class="preset-editor-actions">
+              <button id="pc-btn-capture-current" class="btn-xs" type="button">↻ Capturer curseurs actuels</button>
+              <div style="display:flex;gap:6px;">
+                <button id="pc-btn-cancel-preset" class="btn-xs" type="button">Annuler</button>
+                <button id="pc-btn-save-preset" class="btn primary" style="padding:5px 12px;font-size:0.82rem;" type="button">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+          <div class="presets-bar" id="pc-presets-bar"></div>
+        </div>
+
+        <div class="pc-params-list" id="pc-params-list"></div>
+
+        <div class="pc-safespace-box">
+          <div class="likert-bar-head">
+            <span>🌿 Configuration Safe Space</span>
+          </div>
+          <div id="pc-safespace-params" class="pc-safespace-params"></div>
+        </div>
+
+        <div class="pc-likert-bar">
+          <div class="likert-bar-head">
+            <span>Évaluation Likert rapide</span>
+            <span id="pc-likert-last" class="tag">Dernière : —</span>
+          </div>
+          <div id="pc-likert-btns" class="likert-btn-row"></div>
+        </div>
+
+        <div class="pc-video-box">
+          <div class="likert-bar-head">
+            <span>Retour Vue Patient</span>
+            <button id="pc-btn-video" class="btn-xs">Activer flux</button>
+          </div>
+          <div class="video-frame">
+            <video id="pc-webrtc-video" autoplay playsinline muted class="hidden"></video>
+            <img id="pc-relay-video" alt="Vue patient" class="hidden" />
+            <div id="pc-video-placeholder" class="video-empty">Flux vidéo inactif (économie batterie casque)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Carte 3 : Appairage QR Codes & Certificat -->
+      <section class="panel">
+        <h2>3. Appairage QR Codes LAN</h2>
+        <p class="muted">Scannez depuis le smartphone ou ouvrez sur le casque VR (100 % hors-ligne).</p>
+
+        <div class="qr-grid">
+          <div class="qr-card">
+            <img id="qr-mobile" alt="QR Mobile" />
+            <div class="qr-title">Mobile Praticien</div>
+            <a id="link-mobile" class="qr-link" target="_blank" rel="noopener">Ouvrir</a>
+          </div>
+          <div class="qr-card">
+            <img id="qr-vr" alt="QR Casque VR" />
+            <div class="qr-title">Casque VR / Simu</div>
+            <a id="link-vr" class="qr-link" target="_blank" rel="noopener">Ouvrir Simulateur</a>
+          </div>
+          <div class="qr-card">
+            <img id="qr-setup" alt="QR Certificat CA" />
+            <div class="qr-title">1ère fois : Certificat CA</div>
+            <a id="link-setup" class="qr-link" target="_blank" rel="noopener">Page Setup HTTP</a>
+          </div>
+        </div>
+
+        <div class="urls-box">
+          <div><strong>mDNS :</strong> <code id="url-mdns">https://vret.local:8443</code></div>
+          <div><strong>IPs LAN :</strong> <span id="ips-list">—</span></div>
+        </div>
+
+        <div class="markers-pc-box">
+          <h3>Marqueurs cliniques directs</h3>
+          <div id="pc-markers-row" class="markers-row"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- VUE 2 : ANALYSE POST-SÉANCE & RAPPORTS PDF/CSV -->
+  <main id="view-analytics" class="view-container">
+    <div class="analytics-layout">
+      <aside class="sessions-sidebar no-print">
+        <h2>Historique des Séances</h2>
+        <div class="form-group">
+          <label for="analytics-patient-filter">Filtrer par patient</label>
+          <select id="analytics-patient-filter"></select>
+        </div>
+        <div id="sessions-list" class="sessions-list"></div>
+      </aside>
+
+      <section class="report-area" id="report-area">
+        <div class="report-header">
+          <div>
+            <h1 id="report-title">Rapport Clinique d'Exposition VRET</h1>
+            <div id="report-subtitle" class="muted">Sélectionnez une séance dans la colonne de gauche.</div>
+          </div>
+          <div class="report-actions no-print">
+            <a id="btn-export-csv" class="btn secondary" href="#" download>⬇ Export CSV</a>
+            <button id="btn-print-pdf" class="btn primary">🖨 Rapport PDF</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="kpi-grid">
+          <div class="kpi-card"><span class="kpi-k">Durée</span><span class="kpi-v" id="kpi-duration">—</span></div>
+          <div class="kpi-card"><span class="kpi-k">SUDs Initial / Final</span><span class="kpi-v" id="kpi-suds">—</span></div>
+          <div class="kpi-card"><span class="kpi-k">Pic d'Anxiété</span><span class="kpi-v" id="kpi-peak">—</span></div>
+          <div class="kpi-card"><span class="kpi-k">Passages Safe Space</span><span class="kpi-v" id="kpi-safespace">—</span></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Chronologie Synchronisée : Anxiété (Likert) &amp; Intensité des Stimuli</h3>
+            <div class="chart-legend">
+              <span class="leg-item"><i class="sw-likert"></i> Score Likert (SUDs)</span>
+              <span class="leg-item"><i class="sw-stim"></i> Intensité Stimulus Clé (%)</span>
+              <span class="leg-item"><i class="sw-safe"></i> Zone Safe Space</span>
+              <span class="leg-item"><i class="sw-mark"></i> Marqueur Clinique</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="clinical-chart" width="1080" height="400"></canvas>
+            <div id="chart-tooltip" class="chart-tooltip hidden"></div>
+          </div>
+        </div>
+
+        <div class="report-notes-box">
+          <h3>Notes de synthèse clinique</h3>
+          <textarea id="report-notes-editor" rows="3" class="no-print" placeholder="Compléter les observations post-séance..."></textarea>
+          <div class="print-only" id="report-notes-print"></div>
+          <div class="no-print" style="margin-top:8px;">
+            <button id="btn-save-report-notes" class="btn secondary">Enregistrer les notes</button>
+          </div>
+        </div>
+
+        <div class="timeline-table-wrap">
+          <h3>Journal horodaté des événements et évaluations</h3>
+          <table class="timeline-table">
+            <thead>
+              <tr>
+                <th>Heure</th>
+                <th>Type</th>
+                <th>Scène</th>
+                <th>Détail / Score</th>
+              </tr>
+            </thead>
+            <tbody id="timeline-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #070b14;
+  color: #e2e8f0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#vr-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.lobby-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.92), rgba(5, 8, 16, 0.98));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.lobby-overlay.hidden {
+  display: none;
+}
+
+.lobby-card {
+  width: 100%;
+  max-width: 540px;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.badge-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.badge-dot.ok {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+}
+
+.badge-dot.err {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 1.65rem;
+  color: #f8fafc;
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.pin-row {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.pin-row label {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.pin-row input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1.15rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-k {
+  font-size: 0.78rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-v {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn.large {
+  padding: 16px 20px;
+  font-size: 1.05rem;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+}
+
+.btn.accent {
+  background: #1e293b;
+  border: 1px solid #38bdf8;
+  color: #e0f2fe;
+}
+
+.btn.secondary {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.hint {
+  margin: 16px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.sim-hud {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sim-hud.hidden {
+  display: none;
+}
+
+.hud-left, .hud-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.pill {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid #334155;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pill.safe {
+  background: rgba(21, 128, 61, 0.9);
+  border-color: #4ade80;
+  color: #fff;
+}
+
+.pill.hidden {
+  display: none;
+}
+
+.btn-mini {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.sim-reticle {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9;
+}
+
+.sim-reticle.hidden {
+  display: none;
+}
